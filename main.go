@@ -2,17 +2,39 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/DanielJohn17/rss-blog-aggregator/internal/config"
+	"github.com/DanielJohn17/rss-blog-aggregator/internal/handlers"
 )
 
 func main() {
-	config := config.Read()
+	cfg := config.Read()
+	if cfg == nil {
+		fmt.Println("Config not found!")
+		os.Exit(1)
+	}
 
-	fmt.Printf("Db url: %s\n", config.DBURL)
-	fmt.Printf("Current user: %s\n", config.CurrentUsername)
+	state := &handlers.State{
+		Config: cfg,
+	}
 
-	config.SetUser("daniel")
+	commands := &handlers.Commands{}
 
-	fmt.Printf("Db url: %s\n", config.DBURL)
-	fmt.Printf("Current user: %s\n", config.CurrentUsername)
+	commands.Register("login", handlers.HandlerLogin)
+
+	if len(os.Args) < 2 {
+		fmt.Println("No command provided.")
+		os.Exit(1)
+	}
+
+	cmd := handlers.Command{
+		Name: os.Args[1],
+		Args: os.Args[2:],
+	}
+
+	if err:= commands.Run(state, cmd); err != nil {
+		fmt.Printf("Error executing command '%s': %v\n", cmd.Name, err)
+		os.Exit(1)
+	}
 }
