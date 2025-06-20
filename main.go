@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"github.com/DanielJohn17/rss-blog-aggregator/internal/config"
 )
 
 func main() {
-	pwd, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Error retrieving home directory:", err)
-		return
-	}
-	fmt.Println("Home Directory:", pwd)
+	config := config.Read()
+
+	fmt.Printf("Db url: %s\n", config.DBURL)
+	fmt.Printf("Current user: %s\n", config.CurrentUsername)
+
+	config.SetUser("daniel")
+
+	fmt.Printf("Db url: %s\n", config.DBURL)
+	fmt.Printf("Current user: %s\n", config.CurrentUsername)
 }
