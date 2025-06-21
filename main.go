@@ -1,11 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/DanielJohn17/rss-blog-aggregator/internal/config"
+	"github.com/DanielJohn17/rss-blog-aggregator/internal/database"
 	"github.com/DanielJohn17/rss-blog-aggregator/internal/handlers"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -15,13 +18,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	db, err := sql.Open("postgres", cfg.DBURL)
+	if err != nil {
+		fmt.Printf("Error connecting to database: %v\n", err)
+		os.Exit(1)
+	}
+
+	dbQueries := database.New(db)
 	state := &handlers.State{
+		Db:     dbQueries,
 		Config: cfg,
 	}
 
 	commands := &handlers.Commands{}
 
 	commands.Register("login", handlers.HandlerLogin)
+	commands.Register("register", handlers.HandlerRegister)
 
 	if len(os.Args) < 2 {
 		fmt.Println("No command provided.")
@@ -33,7 +45,7 @@ func main() {
 		Args: os.Args[2:],
 	}
 
-	if err:= commands.Run(state, cmd); err != nil {
+	if err := commands.Run(state, cmd); err != nil {
 		fmt.Printf("Error executing command '%s': %v\n", cmd.Name, err)
 		os.Exit(1)
 	}
