@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func ResetUsersHandler(s *State, _ Command) error {
+func HandlerResetUsers(s *State, _ Command) error {
 	cxt := context.Background()
 
 	if err := s.Db.Deleteusers(cxt); err != nil {
