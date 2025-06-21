@@ -4,6 +4,12 @@ INSERT INTO users (id, created_at, updated_at, name)
 RETURNING
   *;
 
+-- name: Getusers :many
+SELECT
+  *
+FROM
+  users;
+
 -- name: Getuser :one
 SELECT
   *
