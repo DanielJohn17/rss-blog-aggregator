@@ -36,6 +36,7 @@ func main() {
 	commands.Register("register", handlers.HandlerRegister)
 	commands.Register("reset", handlers.HandlerResetUsers)
 	commands.Register("users", handlers.HandlerGetUsers)
+	commands.Register("agg", handlers.HandlerAgg)
 
 	if len(os.Args) < 2 {
 		fmt.Println("No command provided.")
