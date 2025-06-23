@@ -13,7 +13,7 @@ import (
 )
 
 const createfeed = `-- name: Createfeed :one
-INSERT INTO feed (id, created_at, updated_at, name, user_id, url)
+INSERT INTO feeds (id, created_at, updated_at, name, user_id, url)
   VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING
   id, created_at, updated_at, name, user_id, url
@@ -47,4 +47,61 @@ func (q *Queries) Createfeed(ctx context.Context, arg CreatefeedParams) (Feed, e
 		&i.Url,
 	)
 	return i, err
+}
+
+const getFeeds = `-- name: GetFeeds :many
+SELECT
+  feeds.id,
+  feeds.created_at,
+  feeds.updated_at,
+  feeds.name,
+  feeds.user_id,
+  feeds.url,
+  "users".name AS user_name
+FROM
+  feeds
+  JOIN "users" ON feeds.user_id = "users".id
+ORDER BY
+  feeds.created_at DESC
+`
+
+type GetFeedsRow struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+	UserID    uuid.UUID
+	Url       string
+	UserName  string
+}
+
+func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFeeds)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFeedsRow
+	for rows.Next() {
+		var i GetFeedsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Name,
+			&i.UserID,
+			&i.Url,
+			&i.UserName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
