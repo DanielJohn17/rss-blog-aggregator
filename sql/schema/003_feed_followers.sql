@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS feed_follows (
   FOREIGN KEY (feed_id) REFERENCES feeds(id) ON DELETE CASCADE,
   UNIQUE (user_id, feed_id)
 );
+
+-- +goose Down
+DROP TABLE IF EXISTS feed_follows;

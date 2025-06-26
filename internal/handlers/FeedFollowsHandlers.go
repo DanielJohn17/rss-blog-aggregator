@@ -50,3 +50,29 @@ func HandlerCreateFeedFollows(s *State, cmd Command) error {
 	)
 	return nil
 }
+
+func HandlerGetFeedFollows(s *State, cmd Command) error {
+	cxt := context.Background()
+
+	user, err := s.Db.Getuser(cxt, s.Config.CurrentUsername)
+	if err != nil {
+		return fmt.Errorf("User %s does not exist", s.Config.CurrentUsername)
+	}
+
+	follows, err := s.Db.GetFeedFollowsForUser(cxt, user.ID)
+	if err != nil {
+		return fmt.Errorf("Failed to retrieve feed follows for user %s", s.Config.CurrentUsername)
+	}
+
+	if len(follows) == 0 {
+		fmt.Println("You are not following any feeds.")
+		return nil
+	}
+
+	fmt.Printf("Feeds followed by %s:\n", s.Config.CurrentUsername)
+	for _, follow := range follows {
+		fmt.Printf("- %s\n", follow.FeedName)
+	}
+
+	return nil
+}
